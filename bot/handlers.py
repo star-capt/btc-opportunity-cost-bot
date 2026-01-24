@@ -39,7 +39,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     menu_text = """₿ **BTC Opportunity Cost**
 
-What could your money be worth today if you'd bought Bitcoin instead?
+What could your money be worth today if you'd bought Bitcoin instead? No regrets, though!—As they say, "everyone gets Bitcoin at the price they deserve."
 
 **Just tell me what you bought:**
 • "iPhone 11 in September 2019"
