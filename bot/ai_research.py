@@ -6,12 +6,27 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Global client cache
+_client = None
+
+def get_openai_client():
+    global _client
+    if _client is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            logger.warning("OPENAI_API_KEY is not set. AI research will be disabled.")
+            return None
+        _client = AsyncOpenAI(api_key=api_key)
+    return _client
 
 async def research_purchase(query: str):
     """
     Uses AI to parse a natural language purchase and research its historical USD cost.
     """
+    client = get_openai_client()
+    if not client:
+        logger.error("AI research failed: OpenAI client not initialized (missing API key).")
+        return None
     prompt = f"""
     Research the historical USD price for the following purchase description: "{query}"
     
