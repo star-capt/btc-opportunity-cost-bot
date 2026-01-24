@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 # UI HELPERS (per design guide)
 # =============================================================================
 
-def back_button():
-    """Return the standard ⏮️ Back button keyboard."""
-    return InlineKeyboardMarkup([[InlineKeyboardButton("⏮️ Back", callback_data="back:delete")]])
+def back_button(text: str = "⏮️ Back"):
+    """Return a back button with optional custom text."""
+    return InlineKeyboardMarkup([[InlineKeyboardButton(text, callback_data="back:delete")]])
 
 async def delete_command_message(update: Update):
     """Delete the user's command message for cleanliness."""
@@ -42,7 +42,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 What could your money be worth today if you'd bought Bitcoin instead?
 
 **Just tell me what you bought:**
-• "iPhone 16 in September 2024"
+• "iPhone 11 in September 2019"
 • "100 shares of GOOG in January 2020"
 • "$500 of ETH in March 2021"
 
@@ -65,7 +65,7 @@ async def history_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not history:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="📭 You haven't made any calculations yet!\n\nJust send me a message like: `iPhone 16 in Sep 2024`",
+            text="📭 You haven't made any calculations yet!\n\nJust send me a message like: `iPhone 11 in Sep 2019`",
             reply_markup=back_button(),
             parse_mode='Markdown'
         )
@@ -180,9 +180,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if current_value > 0:
         response += f"\n• 🟡 `+${btc_vs_current:,.2f}` vs holding {result['item']}"
     
+    # 6. Fun, context-aware back button
+    import random
+    if gain_usd > 100000:
+        fun_labels = ["I'll never recover! 😩", "What will my grandkids think?! 😭", "I need a drink... 🥃", "Delete this immediately. 🙈"]
+    elif gain_usd > 0:
+        fun_labels = ["That hurts a little. 🩹", "Hindsight is 20/20. 👓", "Bitcoin is magic money... 🪄"]
+    else:
+        fun_labels = ["I'm a genius! 🧠", "Crisis averted. 😌", "Phew, close call! 😅"]
+    
+    back_text = random.choice(fun_labels)
+
     await status_msg.edit_text(
         text=response,
-        reply_markup=back_button(),
+        reply_markup=back_button(back_text),
         parse_mode='Markdown'
     )
 
