@@ -108,6 +108,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
         
+    await delete_command_message(update)
+    
     query = update.message.text
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
