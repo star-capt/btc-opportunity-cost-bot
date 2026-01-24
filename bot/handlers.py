@@ -91,7 +91,7 @@ async def tipjar_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await delete_command_message(update)
     
     message = (
-        "🍯 **Show some love!🧡**\n\n"
+        "🍯 **Support the Bot!**\n\n"
         "If you enjoy seeing how much money you could have had, consider leaving a tip!\n\n"
         "**BTC**\n`bc1qa2tgxpuswjnprc7k82296z2ryvshth3c8t53ya0gutkyvvuzdv6sw5y8j4`"
     )
