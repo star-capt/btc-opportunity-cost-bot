@@ -128,28 +128,57 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 3. Save to history
     await db.save_calculation(user_id, result)
     
-    # 4. Format and display
+    # 4. Calculate gains
     gain_usd = result['btc_value_now'] - result['total_usd']
     gain_pct = (gain_usd / result['total_usd']) * 100
     
-    response = f"""₿ **{result['item']}**
+    # Current value comparison (if item still has value)
+    current_value = result.get('current_total_value', 0)
+    current_gain = current_value - result['total_usd'] if current_value else 0
+    current_gain_pct = (current_gain / result['total_usd']) * 100 if result['total_usd'] > 0 else 0
+    btc_vs_current = result['btc_value_now'] - current_value
+    
+    # 5. Build response with commentary
+    commentary = result.get('commentary', '')
+    commentary_section = f"💬 _{commentary}_\n\n" if commentary else ""
+    
+    # Current value section (only show if item has residual value)
+    if current_value > 0:
+        current_section = f"""
+📊 **Current Value (If Held):**
+• Unit Price Now: `${result.get('current_unit_value', 0):,.2f}`
+• Total Value Now: `${current_value:,.2f}`
+• Change: `{'🟢 +' if current_gain >= 0 else '🔴 '}${abs(current_gain):,.2f}` ({current_gain_pct:+.1f}%)
+• _{result.get('value_explanation', '')}_
+"""
+    else:
+        current_section = f"""
+📊 **Current Value:**
+• `$0.00` — _{result.get('value_explanation', 'Consumed/no resale value')}_
+"""
+    
+    response = f"""{commentary_section}₿ **{result['item']}**
 📅 {result['purchase_date']}
 
 💰 **Original Purchase:**
-• Cost: `${result['total_usd']:,.2f}`
-• {result['source']}
-
+• Quantity: `{result.get('quantity', 1):,.2f}` @ `${result.get('unit_price', result['total_usd']):,.2f}` each
+• Total Cost: `${result['total_usd']:,.2f}`
+• _{result['source']}_
+{current_section}
 🚀 **Bitcoin Alternative:**
 • BTC Price then: `${result['btc_price_then']:,.2f}`
 • BTC Purchased: `{result['btc_amount']:.6f} BTC`
 
-✨ **Value Today:**
+✨ **If You'd Bought BTC:**
 • Current BTC: `${result['btc_price_now']:,.2f}`
 • **Total Value: `${result['btc_value_now']:,.2f}`**
 
 📈 **Opportunity Cost:**
-• `{'🟢 +' if gain_usd >= 0 else '🔴 -'}${abs(gain_usd):,.2f}` ({gain_pct:.1f}%)
-"""
+• {'🟢' if gain_usd >= 0 else '🔴'} `{'+' if gain_usd >= 0 else '-'}${abs(gain_usd):,.2f}` vs original purchase ({gain_pct:,.1f}%)"""
+    
+    # Add comparison to current holding if item still has value
+    if current_value > 0:
+        response += f"\n• 🟡 `+${btc_vs_current:,.2f}` vs holding {result['item']}"
     
     await status_msg.edit_text(
         text=response,
