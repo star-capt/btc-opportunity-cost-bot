@@ -182,16 +182,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if current_value > 0:
         response += f"\n• 🟡 `+${btc_vs_current:,.2f}` vs holding {result['item']}"
     
-    # 6. Fun, context-aware back button
-    import random
-    if gain_usd > 100000:
-        fun_labels = ["I'll never recover! 😩", "What will my grandkids think?! 😭", "I need a drink... 🥃", "Delete this immediately. 🙈"]
-    elif gain_usd > 0:
-        fun_labels = ["That hurts a little. 🩹", "Hindsight is 20/20. 👓", "Bitcoin is magic money... 🪄"]
-    else:
-        fun_labels = ["I'm a genius! 🧠", "Crisis averted. 😌", "Phew, close call! 😅"]
-    
-    back_text = random.choice(fun_labels)
+    # 6. Use dynamic AI-generated back button text
+    back_text = result.get('button_text', "⏮️ Back")
 
     await status_msg.edit_text(
         text=response,

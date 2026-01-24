@@ -47,9 +47,10 @@ async def run_calculation(query: str):
         "source": research.get('source', 'Unknown')
     }
     
-    # 6. Generate clever commentary
-    commentary = await ai_research.generate_clever_commentary(result)
-    result["commentary"] = commentary
+    # 6. Generate clever commentary and dynamic button text
+    ai_output = await ai_research.generate_clever_commentary(result)
+    result["commentary"] = ai_output.get("commentary", "")
+    result["button_text"] = ai_output.get("button_text", "⏮️ Back")
     
     return result
 

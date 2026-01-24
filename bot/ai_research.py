@@ -76,13 +76,14 @@ async def research_purchase(query: str):
         return None
 
 
-async def generate_clever_commentary(result: dict) -> str:
+async def generate_clever_commentary(result: dict) -> dict:
     """
-    Generates a witty, contextual one-liner about the opportunity cost.
+    Generates a witty, contextual one-liner and dynamic button text about the opportunity cost.
+    Returns a dict with 'commentary' and 'button_text'.
     """
     client = get_openai_client()
     if not client:
-        return ""  # Gracefully degrade - no commentary if no API key
+        return {"commentary": "", "button_text": "⏮️ Back"}
     
     gain_usd = result['btc_value_now'] - result['total_usd']
     gain_multiplier = result['btc_value_now'] / result['total_usd'] if result['total_usd'] > 0 else 0
@@ -107,7 +108,7 @@ async def generate_clever_commentary(result: dict) -> str:
         tone_guidance = "BTC actually LOST money or underperformed the original purchase. Congratulate them on NOT buying BTC! Be self-deprecating about BTC's performance in this window."
     
     prompt = f"""
-    Generate a single witty, clever one-liner comment about this Bitcoin opportunity cost calculation.
+    Generate a witty, clever one-liner comment AND a short dynamic back button label about this Bitcoin opportunity cost calculation.
     
     CRITICAL CONTEXT:
     - Scenario: {scenario}
@@ -121,33 +122,33 @@ async def generate_clever_commentary(result: dict) -> str:
     - BTC gain/loss vs original: ${gain_usd:,.2f} ({gain_multiplier:.1f}x)
     - BTC vs holding item: ${btc_vs_current:,.2f}
     
-    IMPORTANT: If BTC underperformed (scenario is BTC_UNDERPERFORMED), DO NOT say they should have bought BTC!
-    Instead, congratulate them on their purchase or make a self-deprecating joke about BTC's poor timing.
+    Return a JSON object with:
+    - commentary: A witty sentence (under 200 chars). If BTC underperformed, DO NOT say they should have bought BTC.
+    - button_text: A short, funny label for a back/dismiss button (e.g., "I'll never recover! 😩", "Crisis averted. 😌", "My grandkids hate me. 😭"). 
+      Must include an emoji. Keep it under 30 characters.
     
-    Examples for BTC_UNDERPERFORMED scenario:
-    - "Plot twist: You actually WON this round! BTC would've lost you money. Well played. 🏆"
-    - "For once, NOT buying Bitcoin was the big brain move. Your {result['item']} aged better than BTC did!"
-    - "BTC had a rough patch there. Your purchase? Still a better investment. Unexpected W."
+    Examples for BTC_CRUSHED_IT:
+     commentary: "Your iPhone is worth $200 now. BTC would've been worth $47,000. Different kind of upgrade."
+     button_text: "My grandkids hate me. 😭"
     
-    Examples for BTC_CRUSHED_IT scenario:
-    - "That S&P 500 did fine, but BTC would've turned you into a small whale. 🐋"
-    - "Your iPhone is worth $200 now. BTC would've been worth $47,000. Different kind of upgrade."
-    
-    Return ONLY the one-liner, no quotes or extra formatting. Keep it under 200 characters.
+    Examples for BTC_UNDERPERFORMED:
+     commentary: "Plot twist: You actually WON this round! BTC would've lost you money. Well played. 🏆"
+     button_text: "I'm a genius! 🧠"
     """
     
     try:
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a witty copywriter who specializes in making people laugh while also feeling mild regret about their financial decisions. Be clever, not cruel."},
+                {"role": "system", "content": "You are a witty copywriter. Return ONLY a JSON object with 'commentary' and 'button_text'."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=100
+            response_format={"type": "json_object"},
+            max_tokens=200
         )
         
-        return response.choices[0].message.content.strip()
+        return json.loads(response.choices[0].message.content)
     except Exception as e:
-        logger.error(f"Commentary generation failed: {e}")
-        return ""
+        logger.error(f"Commentary/button generation failed: {e}")
+        return {"commentary": "", "button_text": "⏮️ Back"}
 
