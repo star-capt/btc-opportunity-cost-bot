@@ -47,7 +47,7 @@ What could your money be worth today if you'd bought Bitcoin instead? No regrets
 • "$500 of ETH in March 2021"
 
 /history — _See your past calculations_
-/tipjar — _Support the project ❤️_"""
+/tipjar — _Show some love!🧡_"""
     
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -91,9 +91,9 @@ async def tipjar_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await delete_command_message(update)
     
     message = (
-        "🍯 **Support the Bot!**\n\n"
+        "🍯 **Show some love!🧡**\n\n"
         "If you enjoy seeing how much money you could have had, consider leaving a tip!\n\n"
-        "**BTC**\n`bc1qqrqn0n3aff2avwp2dd0zkux84qlq2lvn6qcw8hsw7r69zunswgqq93atac`"
+        "**BTC**\n`bc1qa2tgxpuswjnprc7k82296z2ryvshth3c8t53ya0gutkyvvuzdv6sw5y8j4`"
     )
     
     await context.bot.send_message(
