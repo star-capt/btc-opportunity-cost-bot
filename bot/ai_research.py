@@ -87,29 +87,51 @@ async def generate_clever_commentary(result: dict) -> str:
     gain_usd = result['btc_value_now'] - result['total_usd']
     gain_multiplier = result['btc_value_now'] / result['total_usd'] if result['total_usd'] > 0 else 0
     current_value = result.get('current_total_value', 0)
-    current_vs_btc = result['btc_value_now'] - current_value if current_value else gain_usd
+    btc_vs_current = result['btc_value_now'] - current_value if current_value else gain_usd
+    
+    # Determine the scenario for appropriate tone
+    btc_won_vs_purchase = gain_usd > 0
+    btc_won_vs_holding = btc_vs_current > 0
+    
+    if btc_won_vs_purchase and btc_won_vs_holding:
+        scenario = "BTC_CRUSHED_IT"
+        tone_guidance = "BTC massively outperformed. Make them feel the FOMO hard but playfully."
+    elif btc_won_vs_purchase and not btc_won_vs_holding:
+        scenario = "BTC_BEAT_PURCHASE_BUT_ITEM_DID_BETTER"
+        tone_guidance = "BTC made money, but holding the item would have been even better. Acknowledge the irony."
+    elif not btc_won_vs_purchase and btc_won_vs_holding:
+        scenario = "BTC_LOST_BUT_BEAT_ITEM"
+        tone_guidance = "BTC lost value, but the item lost even more. Cold comfort - mention that both were bad choices."
+    else:
+        scenario = "BTC_UNDERPERFORMED"
+        tone_guidance = "BTC actually LOST money or underperformed the original purchase. Congratulate them on NOT buying BTC! Be self-deprecating about BTC's performance in this window."
     
     prompt = f"""
     Generate a single witty, clever one-liner comment about this Bitcoin opportunity cost calculation.
     
-    Context:
+    CRITICAL CONTEXT:
+    - Scenario: {scenario}
+    - {tone_guidance}
+    
+    Numbers:
     - Item purchased: {result['item']}
     - Original cost: ${result['total_usd']:,.2f}
     - Current value of item: ${current_value:,.2f} ({result.get('value_explanation', 'Unknown')})
     - If they'd bought BTC instead: ${result['btc_value_now']:,.2f}
-    - Money left on table vs BTC: ${gain_usd:,.2f} ({gain_multiplier:.0f}x gain missed)
-    - Difference vs holding original item: ${current_vs_btc:,.2f}
+    - BTC gain/loss vs original: ${gain_usd:,.2f} ({gain_multiplier:.1f}x)
+    - BTC vs holding item: ${btc_vs_current:,.2f}
     
-    The tone should be:
-    - Playful and witty, not mean
-    - Reference the specific item when possible
-    - Include a relevant metaphor, pop culture reference, or clever wordplay
-    - Make the reader smile while feeling the sting of FOMO
+    IMPORTANT: If BTC underperformed (scenario is BTC_UNDERPERFORMED), DO NOT say they should have bought BTC!
+    Instead, congratulate them on their purchase or make a self-deprecating joke about BTC's poor timing.
     
-    Examples of good responses:
-    - "That S&P 500 did fine, but BTC would've turned you into a small whale. Hope you're sitting down! 🐋"
-    - "Your iPhone is worth about $200 now. Know what's worth $47,000? The BTC you could've bought instead. Different kind of upgrade."
-    - "Plot twist: Those groceries fed you for a week. BTC would've fed generations. Oops."
+    Examples for BTC_UNDERPERFORMED scenario:
+    - "Plot twist: You actually WON this round! BTC would've lost you money. Well played. 🏆"
+    - "For once, NOT buying Bitcoin was the big brain move. Your {result['item']} aged better than BTC did!"
+    - "BTC had a rough patch there. Your purchase? Still a better investment. Unexpected W."
+    
+    Examples for BTC_CRUSHED_IT scenario:
+    - "That S&P 500 did fine, but BTC would've turned you into a small whale. 🐋"
+    - "Your iPhone is worth $200 now. BTC would've been worth $47,000. Different kind of upgrade."
     
     Return ONLY the one-liner, no quotes or extra formatting. Keep it under 200 characters.
     """
