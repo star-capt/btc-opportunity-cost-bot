@@ -124,16 +124,20 @@ async def generate_clever_commentary(result: dict) -> dict:
     
     Return a JSON object with:
     - commentary: A witty sentence (under 200 chars). If BTC underperformed, DO NOT say they should have bought BTC.
-    - button_text: A short, funny label for a back/dismiss button (e.g., "I'll never recover! 😩", "Crisis averted. 😌", "My grandkids hate me. 😭"). 
-      Must include an emoji. Keep it under 30 characters.
+    - button_text: A short, high-energy, context-aware label for a back/dismiss button.
+      - If loss is big: Use humor about regret, grandkids, needing therapy, or "Delete this".
+      - If win: Use humor about being a genius, timing the market, or "Big Brain energy".
+      - MUST include a relevant emoji.
+      - Keep it under 30 characters.
+      - BE CREATIVE. Don't just use the examples.
     
-    Examples for BTC_CRUSHED_IT:
-     commentary: "Your iPhone is worth $200 now. BTC would've been worth $47,000. Different kind of upgrade."
-     button_text: "My grandkids hate me. 😭"
-    
-    Examples for BTC_UNDERPERFORMED:
-     commentary: "Plot twist: You actually WON this round! BTC would've lost you money. Well played. 🏆"
-     button_text: "I'm a genius! 🧠"
+    Examples of vibe:
+    - "My grandkids will never forgive me 😭"
+    - "I'll never recover from this 😩"
+    - "I'm a financial genius! 🧠"
+    - "Delete this before I cry 🙈"
+    - "Basically a whale now 🐳"
+    - "Shoulda, woulda, coulda... 🤡"
     """
     
     try:
