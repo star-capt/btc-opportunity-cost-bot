@@ -64,7 +64,7 @@ async def research_purchase(query: str):
     
     try:
         response = await client.chat.completions.create(
-            model="kimi-k2.5",
+            model="moonshotai/kimi-k2.5",
             messages=[
                 {"role": "system", "content": "You are a professional research assistant specializing in historical pricing data for consumer products, stocks, and assets. Provide accurate, well-researched data."},
                 {"role": "user", "content": prompt}
@@ -145,7 +145,7 @@ async def generate_clever_commentary(result: dict) -> dict:
     
     try:
         response = await client.chat.completions.create(
-            model="kimi-k2.5",
+            model="moonshotai/kimi-k2.5",
             messages=[
                 {"role": "system", "content": "You are a witty copywriter. Return ONLY a JSON object with 'commentary' and 'button_text'."},
                 {"role": "user", "content": prompt}
