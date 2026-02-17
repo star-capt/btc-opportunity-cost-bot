@@ -121,10 +121,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = await calculator.run_calculation(query)
     
     if not result:
-        await status_msg.edit_text(
-            "❌ Sorry, I couldn't find reliable pricing for that. Try being more specific with the date or item name!",
-            reply_markup=back_button()
+        error_msg = await status_msg.edit_text(
+            "❌ Sorry, I couldn't find reliable pricing for that. Try being more specific with the date or item name!"
         )
+        # Flash error: delete after 10 seconds
+        async def delete_later():
+            await asyncio.sleep(10)
+            try:
+                await error_msg.delete()
+            except Exception:
+                pass
+        asyncio.create_task(delete_later())
         return
         
     # 3. Save to history
