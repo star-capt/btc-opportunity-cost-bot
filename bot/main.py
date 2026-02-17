@@ -34,12 +34,12 @@ logger = logging.getLogger(__name__)
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 PORT = int(os.getenv("PORT", 8080))
-NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 if not TELEGRAM_BOT_TOKEN:
     logger.error("FATAL: TELEGRAM_BOT_TOKEN is not set. Bot cannot start.")
-if not NVIDIA_API_KEY:
-    logger.warning("WARNING: NVIDIA_API_KEY is not set. AI features will be unavailable.")
+if not OPENAI_API_KEY:
+    logger.warning("WARNING: OPENAI_API_KEY is not set. AI features will be unavailable.")
 if not WEBHOOK_URL:
     logger.warning("WARNING: WEBHOOK_URL is not set. Webhook mode might not work correctly.")
 
