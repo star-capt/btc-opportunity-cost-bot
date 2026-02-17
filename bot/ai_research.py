@@ -9,14 +9,17 @@ logger = logging.getLogger(__name__)
 # Global client cache
 _client = None
 
-def get_openai_client():
+def get_ai_client():
     global _client
     if _client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("NVIDIA_API_KEY")
         if not api_key:
-            logger.warning("OPENAI_API_KEY is not set. AI research will be disabled.")
+            logger.warning("NVIDIA_API_KEY is not set. AI research will be disabled.")
             return None
-        _client = AsyncOpenAI(api_key=api_key)
+        _client = AsyncOpenAI(
+            api_key=api_key,
+            base_url="https://integrate.api.nvidia.com/v1"
+        )
     return _client
 
 async def research_purchase(query: str):
@@ -24,9 +27,9 @@ async def research_purchase(query: str):
     Uses AI to parse a natural language purchase and research its historical USD cost.
     Returns enhanced data including quantity, unit price, and current value.
     """
-    client = get_openai_client()
+    client = get_ai_client()
     if not client:
-        logger.error("AI research failed: OpenAI client not initialized (missing API key).")
+        logger.error("AI research failed: AI client not initialized (missing API key).")
         return None
     prompt = f"""
     Research the historical USD price for the following purchase description: "{query}"
@@ -61,7 +64,7 @@ async def research_purchase(query: str):
     
     try:
         response = await client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="kimi-k2.5",
             messages=[
                 {"role": "system", "content": "You are a professional research assistant specializing in historical pricing data for consumer products, stocks, and assets. Provide accurate, well-researched data."},
                 {"role": "user", "content": prompt}
@@ -81,7 +84,7 @@ async def generate_clever_commentary(result: dict) -> dict:
     Generates a witty, contextual one-liner and dynamic button text about the opportunity cost.
     Returns a dict with 'commentary' and 'button_text'.
     """
-    client = get_openai_client()
+    client = get_ai_client()
     if not client:
         return {"commentary": "", "button_text": "⏮️ Back"}
     
@@ -142,7 +145,7 @@ async def generate_clever_commentary(result: dict) -> dict:
     
     try:
         response = await client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="kimi-k2.5",
             messages=[
                 {"role": "system", "content": "You are a witty copywriter. Return ONLY a JSON object with 'commentary' and 'button_text'."},
                 {"role": "user", "content": prompt}
